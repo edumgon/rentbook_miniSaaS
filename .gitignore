@@ -19,3 +19,6 @@ error_log
 # Temporary files
 /tmp/
 /cache/
+
+# Credentials
+client*.json
