@@ -34,19 +34,19 @@ foreach ($tests as $name => $file) {
     }
     
     // Capture output
-    ob_start();
+    $outputLines = [];
     $exitCode = 0;
-    
+
     try {
-        // Run the test file
-        passthru('php ' . escapeshellarg($testFile) . ' 2>&1', $exitCode);
+        // Run the test file and capture stdout/stderr
+        exec('php ' . escapeshellarg($testFile) . ' 2>&1', $outputLines, $exitCode);
     } catch (Exception $e) {
         echo "  💥 Fatal error: " . $e->getMessage() . "\n";
         $exitCode = 1;
     }
-    
-    $output = ob_get_clean();
-    echo $output;
+
+    $output = implode("\n", $outputLines);
+    echo $output . "\n";
     
     // Parse results from output
     if (preg_match('/✅ Passed:\s+(\d+)/', $output, $matches)) {

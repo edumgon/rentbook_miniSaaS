@@ -193,4 +193,6 @@ class TestRunner
     }
 }
 
-class AssertionError extends Exception {}
+if (!class_exists('AssertionError')) {
+    class AssertionError extends Exception {}
+}
