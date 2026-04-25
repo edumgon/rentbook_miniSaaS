@@ -15,7 +15,10 @@ ini_set('display_errors', '1');
 ob_start();
 
 // Define base path
-define('BASE_PATH', dirname(__DIR__));
+$defaultBasePath = dirname(__DIR__);
+$repoBasePath = '/home2/infoegco/repositories/rentbook_miniSaaS';
+
+define('BASE_PATH', is_dir($defaultBasePath . '/app') && is_dir($defaultBasePath . '/config') ? $defaultBasePath : $repoBasePath);
 define('APP_PATH', BASE_PATH . '/app');
 define('CONFIG_PATH', BASE_PATH . '/config');
 define('PUBLIC_PATH', __DIR__);
