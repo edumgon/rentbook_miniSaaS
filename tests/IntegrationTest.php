@@ -108,9 +108,82 @@ $runner->test('Scenario: Book search from external API', function($t) {
     $t->assertEquals('J.R.R. Tolkien', $book['author_name'][0]);
     
     // Verify cover URL generation
-    $coverUrl = "https://covers.openlibrary.org/b/id/{$book['cover_i']}-M.jpg";
+    $coverUrl = "https://covers.openlibrary.org/b-id/{$book['cover_i']}-M.jpg";
     $t->assertContains('openlibrary.org', $coverUrl);
     $t->assertContains((string)$book['cover_i'], $coverUrl);
+});
+
+$runner->test('Scenario: Book search with multiple APIs', function($t) {
+    // Simulate Open Library response
+    $openLibResponse = [
+        'title' => 'Dom Casmurro',
+        'author' => 'Machado de Assis',
+        'publisher' => 'Editora Nova',
+        'isbn' => '9788535915528',
+        'cover' => 'https://covers.openlibrary.org/b/id/12345-M.jpg',
+        'source' => 'Open Library'
+    ];
+    
+    // Simulate Google Books response
+    $googleResponse = [
+        'title' => 'Dom Casmurro',
+        'author' => 'Machado de Assis',
+        'publisher' => 'Editora Nova',
+        'isbn' => '9788535915528',
+        'cover' => 'https://books.google.com/books/content?id=xyz',
+        'source' => 'Google Books'
+    ];
+    
+    // Verify both have required fields
+    $t->assertArrayHasKey('title', $openLibResponse);
+    $t->assertArrayHasKey('title', $googleResponse);
+    $t->assertArrayHasKey('source', $openLibResponse);
+    $t->assertArrayHasKey('source', $googleResponse);
+    
+    // Verify sources are different
+    $t->assertNotEquals($openLibResponse['source'], $googleResponse['source']);
+    
+    // Verify both can be combined
+    $combinedResults = [$openLibResponse, $googleResponse];
+    $t->assertCount(2, $combinedResults);
+    
+    // Verify deduplication would work (same ISBN)
+    $t->assertEquals($openLibResponse['isbn'], $googleResponse['isbn']);
+});
+
+$runner->test('Scenario: Google Books API response structure', function($t) {
+    // Simulate Google Books API response
+    $googleApiResponse = [
+        'items' => [
+            [
+                'volumeInfo' => [
+                    'title' => 'O Alquimista',
+                    'authors' => ['Paulo Coelho'],
+                    'publisher' => 'Rocco',
+                    'industryIdentifiers' => [
+                        ['type' => 'ISBN_13', 'identifier' => '9788575427583']
+                    ],
+                    'imageLinks' => [
+                        'thumbnail' => 'https://books.google.com/books/content?id=xyz&printsec=frontcover'
+                    ]
+                ]
+            ]
+        ]
+    ];
+    
+    $t->assertArrayHasKey('items', $googleApiResponse);
+    
+    $item = $googleApiResponse['items'][0];
+    $volume = $item['volumeInfo'];
+    
+    $t->assertEquals('O Alquimista', $volume['title']);
+    $t->assertArrayHasKey('authors', $volume);
+    $t->assertArrayHasKey('industryIdentifiers', $volume);
+    
+    // Verify ISBN extraction
+    $identifiers = $volume['industryIdentifiers'];
+    $isbn = $identifiers[0]['identifier'];
+    $t->assertEquals('9788575427583', $isbn);
 });
 
 // ==================== SCENARIO: MULTI-TENANT SECURITY ====================

@@ -98,6 +98,23 @@ $runner->test('Files: Public assets exist', function($t) {
     }
 });
 
+$runner->test('Code: JavaScript includes Google Books API integration', function($t) {
+    $jsContent = file_get_contents(BASE_PATH . '/public_html/js/app.js');
+    
+    // Check for Google Books API function
+    $t->assertContains('searchGoogleBooks', $jsContent, 'Google Books search function missing');
+    
+    // Check for API selector
+    $t->assertContains('api-select', $jsContent, 'API selector missing');
+    
+    // Check for Google Books API endpoint
+    $t->assertContains('googleapis.com/books', $jsContent, 'Google Books API endpoint missing');
+    
+    // Check that Open Library is still present
+    $t->assertContains('searchOpenLibrary', $jsContent, 'Open Library search function missing');
+    $t->assertContains('openlibrary.org', $jsContent, 'Open Library API endpoint missing');
+});
+
 $runner->test('Files: Configuration files exist', function($t) {
     $t->assertTrue(file_exists(BASE_PATH . '/config/database.php'));
     $t->assertTrue(file_exists(BASE_PATH . '/config/oauth.php'));

@@ -11,14 +11,29 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Book Search using Open Library API
+ * Book Search using Open Library API and Google Books API
  */
 function initBookSearch() {
     const searchInput = document.getElementById('book-search');
     const searchBtn = document.getElementById('search-btn');
     const resultsContainer = document.getElementById('search-results');
+    const apiSelect = document.getElementById('api-select');
     
     if (!searchInput || !searchBtn) return;
+    
+    // Add API selector if it doesn't exist
+    if (!apiSelect && searchInput.parentElement) {
+        const select = document.createElement('select');
+        select.id = 'api-select';
+        select.className = 'form-select';
+        select.style.marginBottom = '10px';
+        select.innerHTML = `
+            <option value="both">Todas as APIs</option>
+            <option value="openlibrary">Open Library</option>
+            <option value="google">Google Books</option>
+        `;
+        searchInput.parentElement.insertBefore(select, searchInput);
+    }
     
     // Search on button click
     searchBtn.addEventListener('click', performSearch);
@@ -33,6 +48,7 @@ function initBookSearch() {
     
     async function performSearch() {
         const query = searchInput.value.trim();
+        const apiChoice = document.getElementById('api-select').value;
         
         if (!query) return;
         
@@ -40,17 +56,24 @@ function initBookSearch() {
         resultsContainer.innerHTML = '<p class="text-muted">Buscando...</p>';
         
         try {
-            // Search Open Library API
-            const response = await fetch(
-                `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`
-            );
+            let results = [];
             
-            if (!response.ok) {
-                throw new Error('Search failed');
+            if (apiChoice === 'both' || apiChoice === 'openlibrary') {
+                const openLibResults = await searchOpenLibrary(query);
+                results = results.concat(openLibResults.map(b => ({...b, source: 'Open Library'})));
             }
             
-            const data = await response.json();
-            displayResults(data.docs || []);
+            if (apiChoice === 'both' || apiChoice === 'google') {
+                const googleResults = await searchGoogleBooks(query);
+                results = results.concat(googleResults.map(b => ({...b, source: 'Google Books'})));
+            }
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-muted">Nenhum livro encontrado.</p>';
+                return;
+            }
+            
+            displayResults(results);
             
         } catch (error) {
             console.error('Search error:', error);
@@ -58,38 +81,65 @@ function initBookSearch() {
         }
     }
     
-    function displayResults(books) {
-        if (books.length === 0) {
-            resultsContainer.innerHTML = '<p class="text-muted">Nenhum livro encontrado.</p>';
-            return;
-        }
+    async function searchOpenLibrary(query) {
+        const response = await fetch(
+            `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`
+        );
         
+        if (!response.ok) throw new Error('Open Library search failed');
+        
+        const data = await response.json();
+        return (data.docs || []).map(book => ({
+            title: book.title || 'Título desconhecido',
+            author: book.author_name ? book.author_name[0] : 'Autor desconhecido',
+            publisher: book.publisher ? book.publisher[0] : '',
+            isbn: book.isbn ? book.isbn[0] : '',
+            cover: book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` : null
+        }));
+    }
+    
+    async function searchGoogleBooks(query) {
+        const response = await fetch(
+            `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5`
+        );
+        
+        if (!response.ok) throw new Error('Google Books search failed');
+        
+        const data = await response.json();
+        return (data.items || []).map(item => {
+            const volume = item.volumeInfo || {};
+            const identifiers = volume.industryIdentifiers || [];
+            const isbn = identifiers.find(id => id.type === 'ISBN_13' || id.type === 'ISBN_10');
+            
+            return {
+                title: volume.title || 'Título desconhecido',
+                author: volume.authors ? volume.authors.join(', ') : 'Autor desconhecido',
+                publisher: volume.publisher || '',
+                isbn: isbn ? isbn.identifier : '',
+                cover: volume.imageLinks ? volume.imageLinks.thumbnail : null
+            };
+        });
+    }
+    
+    function displayResults(books) {
         let html = '<h4>Resultados da busca (clique para selecionar):</h4>';
         
         books.forEach(book => {
-            const coverUrl = book.cover_i 
-                ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
-                : null;
-            
-            const title = book.title || 'Título desconhecido';
-            const author = book.author_name ? book.author_name[0] : 'Autor desconhecido';
-            const publisher = book.publisher ? book.publisher[0] : '';
-            const isbn = book.isbn ? book.isbn[0] : '';
-            
             html += `
-                <div class="search-result-item" data-title="${escapeHtml(title)}" 
-                     data-author="${escapeHtml(author)}"
-                     data-publisher="${escapeHtml(publisher)}"
-                     data-isbn="${escapeHtml(isbn)}"
-                     data-cover="${coverUrl || ''}">
-                    ${coverUrl 
-                        ? `<img src="${coverUrl}" alt="" class="search-result-cover">`
+                <div class="search-result-item" data-title="${escapeHtml(book.title)}" 
+                     data-author="${escapeHtml(book.author)}"
+                     data-publisher="${escapeHtml(book.publisher)}"
+                     data-isbn="${escapeHtml(book.isbn)}"
+                     data-cover="${book.cover || ''}">
+                    ${book.cover 
+                        ? `<img src="${book.cover}" alt="" class="search-result-cover">`
                         : `<div class="search-result-cover" style="background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:2rem;">📚</div>`
                     }
                     <div>
-                        <strong>${escapeHtml(title)}</strong>
-                        <p>${escapeHtml(author)}</p>
-                        ${publisher ? `<small>${escapeHtml(publisher)}</small>` : ''}
+                        <strong>${escapeHtml(book.title)}</strong>
+                        <p>${escapeHtml(book.author)}</p>
+                        ${book.publisher ? `<small>${escapeHtml(book.publisher)}</small>` : ''}
+                        <small style="color:#6b7280">Fonte: ${escapeHtml(book.source)}</small>
                     </div>
                 </div>
             `;
