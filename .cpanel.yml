@@ -2,5 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home2/infoegco/public_html/rentBook/
-    - /bin/mkdir -p "$DEPLOYPATH"
-    - /bin/cp -R public_html/. "$DEPLOYPATH"
+#    - /bin/mkdir -p "$DEPLOYPATH"
+    - /bin/cp -R /home2/infoegco/repositories/rentBook_MiniSaaS/public_html/. "$DEPLOYPATH"
