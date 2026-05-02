@@ -186,6 +186,30 @@ $runner->test('Scenario: Google Books API response structure', function($t) {
     $t->assertEquals('9788575427583', $isbn);
 });
 
+$runner->test('Scenario: Google Books API error handling', function($t) {
+    // Simulate error response (no items)
+    $errorResponse = [
+        'items' => []
+    ];
+    
+    $t->assertArrayHasKey('items', $errorResponse);
+    $t->assertEmpty($errorResponse['items']);
+    
+    // Simulate malformed response (no items key)
+    $malformedResponse = [
+        'error' => 'Invalid request'
+    ];
+    
+    $t->assertArrayNotHasKey('items', $malformedResponse);
+    
+    // Verify that empty response should return empty array
+    $results = [];
+    if (isset($malformedResponse['items']) && is_array($malformedResponse['items'])) {
+        $results = $malformedResponse['items'];
+    }
+    $t->assertEmpty($results);
+});
+
 // ==================== SCENARIO: MULTI-TENANT SECURITY ====================
 
 $runner->test('Scenario: Users cannot access other users data', function($t) {

@@ -23,16 +23,43 @@ function initBookSearch() {
     
     // Add API selector if it doesn't exist
     if (!apiSelect && searchInput.parentElement) {
+        // Create a container for inline layout
+        const searchContainer = document.createElement('div');
+        searchContainer.style.display = 'flex';
+        searchContainer.style.gap = '10px';
+        searchContainer.style.alignItems = 'center';
+        searchContainer.style.marginBottom = '10px';
+        
         const select = document.createElement('select');
         select.id = 'api-select';
-        select.className = 'form-select';
-        select.style.marginBottom = '10px';
+        select.style.flex = '0 0 auto';
+        select.style.minWidth = '150px';
+        select.style.padding = '8px';
+        select.style.border = '1px solid #d1d5db';
+        select.style.borderRadius = '4px';
         select.innerHTML = `
-            <option value="both">Todas as APIs</option>
+            <option value="both">Todas</option>
             <option value="openlibrary">Open Library</option>
             <option value="google">Google Books</option>
         `;
-        searchInput.parentElement.insertBefore(select, searchInput);
+        
+        // Move search input to container
+        searchInput.style.flex = '1';
+        
+        // Replace parent with new container
+        const parent = searchInput.parentElement;
+        parent.innerHTML = '';
+        parent.appendChild(searchContainer);
+        searchContainer.appendChild(select);
+        searchContainer.appendChild(searchInput);
+        
+        // Re-get references
+        const newSearchInput = document.getElementById('book-search');
+        const newSearchBtn = document.getElementById('search-btn');
+        if (newSearchBtn) {
+            searchContainer.appendChild(newSearchBtn);
+            newSearchBtn.style.flex = '0 0 auto';
+        }
     }
     
     // Search on button click
@@ -99,26 +126,40 @@ function initBookSearch() {
     }
     
     async function searchGoogleBooks(query) {
-        const response = await fetch(
-            `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5`
-        );
-        
-        if (!response.ok) throw new Error('Google Books search failed');
-        
-        const data = await response.json();
-        return (data.items || []).map(item => {
-            const volume = item.volumeInfo || {};
-            const identifiers = volume.industryIdentifiers || [];
-            const isbn = identifiers.find(id => id.type === 'ISBN_13' || id.type === 'ISBN_10');
+        try {
+            const response = await fetch(
+                `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5&printType=books`
+            );
             
-            return {
-                title: volume.title || 'Título desconhecido',
-                author: volume.authors ? volume.authors.join(', ') : 'Autor desconhecido',
-                publisher: volume.publisher || '',
-                isbn: isbn ? isbn.identifier : '',
-                cover: volume.imageLinks ? volume.imageLinks.thumbnail : null
-            };
-        });
+            if (!response.ok) {
+                console.error('Google Books API error:', response.status, response.statusText);
+                return []; // Return empty array on error
+            }
+            
+            const data = await response.json();
+            
+            if (!data.items || !Array.isArray(data.items)) {
+                console.warn('Google Books API returned no items');
+                return [];
+            }
+            
+            return data.items.map(item => {
+                const volume = item.volumeInfo || {};
+                const identifiers = volume.industryIdentifiers || [];
+                const isbn = identifiers.find(id => id.type === 'ISBN_13' || id.type === 'ISBN_10');
+                
+                return {
+                    title: volume.title || 'Título desconhecido',
+                    author: volume.authors ? volume.authors.join(', ') : 'Autor desconhecido',
+                    publisher: volume.publisher || '',
+                    isbn: isbn ? isbn.identifier : '',
+                    cover: volume.imageLinks ? volume.imageLinks.thumbnail : null
+                };
+            });
+        } catch (error) {
+            console.error('Google Books API fetch error:', error);
+            return []; // Return empty array on error
+        }
     }
     
     function displayResults(books) {
