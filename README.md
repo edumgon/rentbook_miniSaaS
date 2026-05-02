@@ -43,6 +43,15 @@ Sistema de gestão de empréstimo de livros pessoal. Desenvolvido em PHP 8.x pur
    - Adicione o redirect URI: `https://seudominio.com/auth/callback`
    - Copie o Client ID e Client Secret para o `.env`
 
+4. (Opcional) Configure a Google Books API:
+   - No mesmo projeto do OAuth, habilite "Books API"
+   - Crie credenciais tipo "API Key"
+   - Configure restrições da API Key (recomendado):
+     * Application restrictions: HTTP referrers (seudominio.com)
+     * API restrictions: Books API apenas
+   - Copie a API Key para o `.env` em `GOOGLE_BOOKS_API_KEY`
+   - Se deixar em branco, o sistema usará apenas Open Library
+
 ### 3. Deploy via Git (cPanel)
 
 1. No cPanel, acesse "Git Version Control"

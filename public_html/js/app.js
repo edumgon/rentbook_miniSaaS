@@ -23,6 +23,9 @@ function initBookSearch() {
     
     // Add API selector if it doesn't exist
     if (!apiSelect && searchInput.parentElement) {
+        // Check if Google Books is enabled
+        const googleEnabled = window.GOOGLE_BOOKS_CONFIG && window.GOOGLE_BOOKS_CONFIG.enabled;
+        
         // Create a container for inline layout
         const searchContainer = document.createElement('div');
         searchContainer.style.display = 'flex';
@@ -37,11 +40,21 @@ function initBookSearch() {
         select.style.padding = '8px';
         select.style.border = '1px solid #d1d5db';
         select.style.borderRadius = '4px';
-        select.innerHTML = `
-            <option value="both">Todas</option>
-            <option value="openlibrary">Open Library</option>
-            <option value="google">Google Books</option>
-        `;
+        
+        // Only show Google Books option if enabled
+        if (googleEnabled) {
+            select.innerHTML = `
+                <option value="both">Todas</option>
+                <option value="openlibrary">Open Library</option>
+                <option value="google">Google Books</option>
+            `;
+        } else {
+            select.innerHTML = `
+                <option value="openlibrary">Open Library</option>
+            `;
+            select.disabled = true;
+            select.style.opacity = '0.7';
+        }
         
         // Move search input to container
         searchInput.style.flex = '1';
@@ -126,14 +139,21 @@ function initBookSearch() {
     }
     
     async function searchGoogleBooks(query) {
+        // Check if Google Books is enabled and has API key
+        if (!window.GOOGLE_BOOKS_CONFIG || !window.GOOGLE_BOOKS_CONFIG.enabled || !window.GOOGLE_BOOKS_CONFIG.apiKey) {
+            console.warn('Google Books API is not configured or disabled');
+            return [];
+        }
+        
         try {
+            const apiKey = window.GOOGLE_BOOKS_CONFIG.apiKey;
             const response = await fetch(
-                `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5&printType=books`
+                `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5&printType=books&key=${apiKey}`
             );
             
             if (!response.ok) {
-                console.error('Google Books API error:', response.status, response.statusText);
-                return []; // Return empty array on error
+                console.warn('Google Books API error:', response.status, response.statusText);
+                return []; // Return empty array on error (don't throw)
             }
             
             const data = await response.json();
@@ -157,8 +177,8 @@ function initBookSearch() {
                 };
             });
         } catch (error) {
-            console.error('Google Books API fetch error:', error);
-            return []; // Return empty array on error
+            console.warn('Google Books API fetch error:', error.message);
+            return []; // Return empty array on error (don't throw)
         }
     }
     

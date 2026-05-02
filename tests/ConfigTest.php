@@ -110,9 +110,25 @@ $runner->test('Code: JavaScript includes Google Books API integration', function
     // Check for Google Books API endpoint
     $t->assertContains('googleapis.com/books', $jsContent, 'Google Books API endpoint missing');
     
+    // Check that API key is used from window config (not hardcoded)
+    $t->assertContains('window.GOOGLE_BOOKS_CONFIG', $jsContent, 'Window config missing');
+    $t->assertContains('apiKey', $jsContent, 'API key reference missing');
+    
     // Check that Open Library is still present
     $t->assertContains('searchOpenLibrary', $jsContent, 'Open Library search function missing');
     $t->assertContains('openlibrary.org', $jsContent, 'Open Library API endpoint missing');
+});
+
+$runner->test('Files: Google Books configuration file exists', function($t) {
+    $t->assertTrue(file_exists(BASE_PATH . '/config/google-books.php'), 'Google Books config file missing');
+});
+
+$runner->test('Config: Google Books config structure is valid', function($t) {
+    $config = require BASE_PATH . '/config/google-books.php';
+    
+    $t->assertArrayHasKey('api_key', $config, 'api_key missing from config');
+    $t->assertArrayHasKey('enabled', $config, 'enabled missing from config');
+    $t->assertIsBool($config['enabled'], 'enabled must be boolean');
 });
 
 $runner->test('Files: Configuration files exist', function($t) {

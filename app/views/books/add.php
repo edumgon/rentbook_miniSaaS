@@ -1,8 +1,14 @@
+<?php
+$googleBooksConfig = require __DIR__ . '/../../config/google-books.php';
+$googleBooksEnabled = $googleBooksConfig['enabled'];
+$googleBooksApiKey = $googleBooksConfig['api_key'];
+?>
+
 <h1>Adicionar Livro</h1>
 
 <div class="card">
     <div class="search-section">
-        <h3>Buscar na Open Library</h3>
+        <h3>Buscar Livros</h3>
         <div class="search-form">
             <input type="text" id="book-search" class="form-input" placeholder="Digite o título ou autor...">
             <button type="button" id="search-btn" class="btn btn-secondary">Buscar</button>
@@ -47,3 +53,11 @@
         </div>
     </form>
 </div>
+
+<script>
+// Configuration injected from backend (not hardcoded in JS)
+window.GOOGLE_BOOKS_CONFIG = {
+    enabled: <?= $googleBooksEnabled ? 'true' : 'false' ?>,
+    apiKey: '<?= htmlspecialchars($googleBooksApiKey, ENT_QUOTES) ?>'
+};
+</script>
