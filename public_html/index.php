@@ -23,11 +23,26 @@ define('APP_PATH', BASE_PATH . '/app');
 define('CONFIG_PATH', BASE_PATH . '/config');
 define('PUBLIC_PATH', __DIR__);
 
-// Autoload classes
+// Autoload classes - PSR-4 compatible
 spl_autoload_register(function ($class) {
+    // PSR-4 namespace support (App\Domain\Entity\Book -> app/Domain/Entity/Book.php)
+    $prefix = 'App\\';
+    $baseDir = APP_PATH . '/';
+    
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) === 0) {
+        $relativeClass = substr($class, $len);
+        $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+        
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+    
+    // Legacy autoload for non-namespaced classes (Auth, Controller base)
     $paths = [
         APP_PATH . '/core/' . $class . '.php',
-        APP_PATH . '/models/' . $class . '.php',
         APP_PATH . '/controllers/' . $class . '.php'
     ];
     
@@ -46,36 +61,36 @@ Env::load(BASE_PATH);
 $router = new Router();
 
 // Public routes
-$router->get('', 'DashboardController', 'index');
+$router->get('', 'App\InterfaceAdapter\Controller\DashboardController', 'index');
 $router->get('login', 'AuthController', 'login');
 $router->get('auth/callback', 'AuthController', 'callback');
 $router->post('logout', 'AuthController', 'logout');
 
 // Dashboard
-$router->get('dashboard', 'DashboardController', 'index');
+$router->get('dashboard', 'App\InterfaceAdapter\Controller\DashboardController', 'index');
 
-// Books
-$router->get('books', 'BookController', 'index');
-$router->get('books/add', 'BookController', 'add');
-$router->post('books/store', 'BookController', 'store');
-$router->get('books/{id}/edit', 'BookController', 'edit');
-$router->post('books/{id}/update', 'BookController', 'update');
-$router->post('books/{id}/delete', 'BookController', 'delete');
+// Books - Clean Architecture Controllers
+$router->get('books', 'App\InterfaceAdapter\Controller\BookController', 'index');
+$router->get('books/add', 'App\InterfaceAdapter\Controller\BookController', 'add');
+$router->post('books/store', 'App\InterfaceAdapter\Controller\BookController', 'store');
+$router->get('books/{id}/edit', 'App\InterfaceAdapter\Controller\BookController', 'edit');
+$router->post('books/{id}/update', 'App\InterfaceAdapter\Controller\BookController', 'update');
+$router->post('books/{id}/delete', 'App\InterfaceAdapter\Controller\BookController', 'delete');
 
-// Borrowers
-$router->get('borrowers', 'BorrowerController', 'index');
-$router->get('borrowers/list', 'BorrowerController', 'list');
-$router->post('borrowers/store', 'BorrowerController', 'store');
-$router->get('borrowers/{id}/edit', 'BorrowerController', 'edit');
-$router->post('borrowers/{id}/update', 'BorrowerController', 'update');
-$router->post('borrowers/{id}/delete', 'BorrowerController', 'delete');
+// Borrowers - Clean Architecture Controllers
+$router->get('borrowers', 'App\InterfaceAdapter\Controller\BorrowerController', 'index');
+$router->get('borrowers/list', 'App\InterfaceAdapter\Controller\BorrowerController', 'list');
+$router->post('borrowers/store', 'App\InterfaceAdapter\Controller\BorrowerController', 'store');
+$router->get('borrowers/{id}/edit', 'App\InterfaceAdapter\Controller\BorrowerController', 'edit');
+$router->post('borrowers/{id}/update', 'App\InterfaceAdapter\Controller\BorrowerController', 'update');
+$router->post('borrowers/{id}/delete', 'App\InterfaceAdapter\Controller\BorrowerController', 'delete');
 
-// Loans
-$router->get('loans', 'LoanController', 'index');
-$router->get('loans/create', 'LoanController', 'create');
-$router->post('loans/store', 'LoanController', 'store');
-$router->post('loans/{id}/return', 'LoanController', 'return');
-$router->get('loans/history/{bookId}', 'LoanController', 'history');
+// Loans - Clean Architecture Controllers
+$router->get('loans', 'App\InterfaceAdapter\Controller\LoanController', 'index');
+$router->get('loans/create', 'App\InterfaceAdapter\Controller\LoanController', 'create');
+$router->post('loans/store', 'App\InterfaceAdapter\Controller\LoanController', 'store');
+$router->post('loans/{id}/return', 'App\InterfaceAdapter\Controller\LoanController', 'return');
+$router->get('loans/history/{bookId}', 'App\InterfaceAdapter\Controller\LoanController', 'history');
 
 // Get request URL
 $url = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');

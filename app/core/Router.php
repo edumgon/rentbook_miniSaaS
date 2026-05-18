@@ -101,19 +101,25 @@ class Router
         $controllerName = $this->currentRoute['controller'];
         $action = $this->currentRoute['action'];
         
-        $controllerFile = __DIR__ . '/../controllers/' . $controllerName . '.php';
-        
-        if (!file_exists($controllerFile)) {
-            throw new Exception("Controller not found: {$controllerName}");
+        // Support fully-qualified class names (App\InterfaceAdapter\Controller\LoanController)
+        if (class_exists($controllerName)) {
+            $controller = new $controllerName();
+        } else {
+            // Legacy: look in controllers directory
+            $controllerFile = __DIR__ . '/../controllers/' . $controllerName . '.php';
+            
+            if (!file_exists($controllerFile)) {
+                throw new Exception("Controller not found: {$controllerName}");
+            }
+            
+            require_once $controllerFile;
+            
+            if (!class_exists($controllerName)) {
+                throw new Exception("Controller class not found: {$controllerName}");
+            }
+            
+            $controller = new $controllerName();
         }
-        
-        require_once $controllerFile;
-        
-        if (!class_exists($controllerName)) {
-            throw new Exception("Controller class not found: {$controllerName}");
-        }
-        
-        $controller = new $controllerName();
         
         if (!method_exists($controller, $action)) {
             throw new Exception("Action not found: {$action} in {$controllerName}");
