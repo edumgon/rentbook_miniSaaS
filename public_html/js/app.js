@@ -131,7 +131,9 @@ function initBookSearch() {
                     author: volume.authors ? volume.authors.join(', ') : 'Autor desconhecido',
                     publisher: volume.publisher || '',
                     isbn: isbn ? isbn.identifier : '',
-                    cover: volume.imageLinks ? volume.imageLinks.thumbnail : null
+                    cover: volume.imageLinks && volume.imageLinks.thumbnail
+                        ? volume.imageLinks.thumbnail.replace(/^http:\/\//, 'https://')
+                        : null
                 };
             });
         } catch (error) {
