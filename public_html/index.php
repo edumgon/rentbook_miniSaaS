@@ -40,10 +40,11 @@ spl_autoload_register(function ($class) {
         }
     }
     
-    // Legacy autoload for non-namespaced classes (Auth, Controller base)
+    // Legacy autoload for non-namespaced classes (Auth, Controller base, Model, User)
     $paths = [
         APP_PATH . '/core/' . $class . '.php',
-        APP_PATH . '/controllers/' . $class . '.php'
+        APP_PATH . '/controllers/' . $class . '.php',
+        APP_PATH . '/models/' . $class . '.php'
     ];
     
     foreach ($paths as $path) {
