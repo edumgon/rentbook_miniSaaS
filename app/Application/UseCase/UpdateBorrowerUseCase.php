@@ -22,7 +22,7 @@ class UpdateBorrowerUseCase
             throw new \DomainException('Borrower not found');
         }
 
-        $borrower->update($input->name, $input->email, $input->phone);
+        $borrower->update($input->name, $input->email, $input->phone, $input->location);
         $savedBorrower = $this->borrowerRepository->save($borrower);
 
         return new UpdateBorrowerOutput(

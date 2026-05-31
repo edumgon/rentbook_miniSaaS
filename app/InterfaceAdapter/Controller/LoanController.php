@@ -255,6 +255,7 @@ class LoanController extends \Controller
             'name' => $borrower->getName(),
             'email' => $borrower->getEmail(),
             'phone' => $borrower->getPhone(),
+            'location' => $borrower->getLocation(),
             'created_at' => $borrower->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updated_at' => $borrower->getUpdatedAt()?->format('Y-m-d H:i:s'),
         ];

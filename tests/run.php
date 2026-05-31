@@ -15,7 +15,8 @@ $tests = [
     'Configuration Tests' => 'ConfigTest.php',
     'Security Tests' => 'SecurityTest.php',
     'Unit Tests' => 'UnitTest.php',
-    'Integration Tests' => 'IntegrationTest.php'
+    'Integration Tests' => 'IntegrationTest.php',
+    'View Contract Tests' => 'ViewContractTest.php'
 ];
 
 $totalPassed = 0;

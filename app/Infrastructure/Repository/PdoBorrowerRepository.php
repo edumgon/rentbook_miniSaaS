@@ -48,26 +48,28 @@ class PdoBorrowerRepository implements BorrowerRepositoryInterface
 
         if ($borrower->getId()) {
             // Update
-            $stmt = $this->pdo->prepare("UPDATE borrowers SET 
-                name = :name, email = :email, phone = :phone, updated_at = :updated_at 
+            $stmt = $this->pdo->prepare("UPDATE borrowers SET
+                name = :name, email = :email, phone = :phone, location = :location, updated_at = :updated_at
                 WHERE id = :id");
             $stmt->execute([
                 'id' => $data['id'],
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'],
+                'location' => $data['location'],
                 'updated_at' => $data['updated_at']
             ]);
         } else {
             // Insert
-            $stmt = $this->pdo->prepare("INSERT INTO borrowers 
-                (user_id, name, email, phone, created_at, updated_at) 
-                VALUES (:user_id, :name, :email, :phone, :created_at, :updated_at)");
+            $stmt = $this->pdo->prepare("INSERT INTO borrowers
+                (user_id, name, email, phone, location, created_at, updated_at)
+                VALUES (:user_id, :name, :email, :phone, :location, :created_at, :updated_at)");
             $stmt->execute([
                 'user_id' => $data['user_id'],
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'phone' => $data['phone'],
+                'location' => $data['location'],
                 'created_at' => $data['updated_at'],
                 'updated_at' => $data['updated_at']
             ]);

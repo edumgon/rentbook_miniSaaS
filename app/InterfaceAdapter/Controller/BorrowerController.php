@@ -85,7 +85,8 @@ class BorrowerController extends \Controller
                 userId: $userId,
                 name: $name,
                 email: $this->sanitize($_POST['email'] ?? ''),
-                phone: $this->sanitize($_POST['phone'] ?? '')
+                phone: $this->sanitize($_POST['phone'] ?? ''),
+                location: $this->sanitize($_POST['location'] ?? '')
             );
 
             $output = $this->createBorrowerUseCase->execute($input);
@@ -151,7 +152,8 @@ class BorrowerController extends \Controller
                 borrowerId: $id,
                 name: $name,
                 email: $this->sanitize($_POST['email'] ?? ''),
-                phone: $this->sanitize($_POST['phone'] ?? '')
+                phone: $this->sanitize($_POST['phone'] ?? ''),
+                location: $this->sanitize($_POST['location'] ?? '')
             );
 
             $output = $this->updateBorrowerUseCase->execute($input);
@@ -217,6 +219,7 @@ class BorrowerController extends \Controller
             'name' => $borrower->getName(),
             'email' => $borrower->getEmail(),
             'phone' => $borrower->getPhone(),
+            'location' => $borrower->getLocation(),
             'created_at' => $borrower->getCreatedAt()?->format('Y-m-d H:i:s'),
             'updated_at' => $borrower->getUpdatedAt()?->format('Y-m-d H:i:s'),
         ];

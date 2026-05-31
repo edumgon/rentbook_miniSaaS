@@ -21,7 +21,8 @@ class CreateBorrowerUseCase
             userId: $input->userId,
             name: $input->name,
             email: $input->email,
-            phone: $input->phone
+            phone: $input->phone,
+            location: $input->location
         );
 
         $savedBorrower = $this->borrowerRepository->save($borrower);

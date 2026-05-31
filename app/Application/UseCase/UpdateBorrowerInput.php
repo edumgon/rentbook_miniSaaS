@@ -12,7 +12,8 @@ class UpdateBorrowerInput
         public readonly int $borrowerId,
         public readonly string $name,
         public readonly ?string $email = null,
-        public readonly ?string $phone = null
+        public readonly ?string $phone = null,
+        public readonly ?string $location = null
     ) {
     }
 }
