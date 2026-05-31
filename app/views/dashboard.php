@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="loan-details">
-                <p><strong>Emprestado para:</strong> <?= htmlspecialchars($loan['borrower_name']) ?></p>
+                <p><strong>Emprestado para:</strong> <?= htmlspecialchars($loan['borrower_name'] ?? 'Desconhecido') ?></p>
                 <?php if ($loan['borrower_phone']): ?>
                     <p><strong>Telefone:</strong> <?= htmlspecialchars($loan['borrower_phone']) ?></p>
                 <?php endif; ?>
@@ -88,7 +88,7 @@
             </div>
         </div>
         <div class="loan-details">
-            <p><strong>Emprestado para:</strong> <?= htmlspecialchars($loan['borrower_name']) ?></p>
+            <p><strong>Emprestado para:</strong> <?= htmlspecialchars($loan['borrower_name'] ?? 'Desconhecido') ?></p>
             <?php if ($loan['borrower_phone']): ?>
                 <p><strong>Telefone:</strong> <?= htmlspecialchars($loan['borrower_phone']) ?></p>
             <?php endif; ?>

@@ -3,6 +3,7 @@
 namespace App\InterfaceAdapter\Controller;
 
 use App\Domain\Repository\BookRepositoryInterface;
+use App\Domain\Repository\BorrowerRepositoryInterface;
 use App\Domain\Repository\LoanRepositoryInterface;
 use App\Domain\ValueObject\LoanStatus;
 use App\Infrastructure\Container\ServiceContainer;
@@ -13,6 +14,7 @@ use App\Infrastructure\Container\ServiceContainer;
 class DashboardController extends \Controller
 {
     private BookRepositoryInterface $bookRepository;
+    private BorrowerRepositoryInterface $borrowerRepository;
     private LoanRepositoryInterface $loanRepository;
 
     public function __construct()
@@ -21,6 +23,7 @@ class DashboardController extends \Controller
         $container->initialize();
 
         $this->bookRepository = $container->get(BookRepositoryInterface::class);
+        $this->borrowerRepository = $container->get(BorrowerRepositoryInterface::class);
         $this->loanRepository = $container->get(LoanRepositoryInterface::class);
     }
 
@@ -57,7 +60,8 @@ class DashboardController extends \Controller
     private function loanToArray(\App\Domain\Entity\Loan $loan): array
     {
         $book = $this->bookRepository->findById($loan->getBookId());
-        
+        $borrower = $this->borrowerRepository->findById($loan->getBorrowerId());
+
         return [
             'id' => $loan->getId(),
             'user_id' => $loan->getUserId(),
@@ -70,6 +74,9 @@ class DashboardController extends \Controller
             'book_title' => $book?->getTitle(),
             'book_author' => $book?->getAuthor(),
             'cover_url' => $book?->getCoverUrl(),
+            'borrower_name' => $borrower?->getName(),
+            'borrower_phone' => $borrower?->getPhone(),
+            'borrower_email' => $borrower?->getEmail(),
             'days_loaned' => $loan->getDaysLoaned(),
             'is_overdue' => $loan->isOverdue(),
         ];
