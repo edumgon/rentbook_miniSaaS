@@ -1,5 +1,5 @@
 <?php
-$googleBooksConfig = require __DIR__ . '/../../config/google-books.php';
+$googleBooksConfig = require CONFIG_PATH . '/google-books.php';
 $googleBooksEnabled = $googleBooksConfig['enabled'];
 $googleBooksApiKey = $googleBooksConfig['api_key'];
 ?>
