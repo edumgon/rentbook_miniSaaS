@@ -731,6 +731,11 @@ h3 {
     flex: 1;
 }
 
+.search-form .search-api-select {
+    flex: 0 0 auto;
+    min-width: 150px;
+}
+
 .search-results {
     margin-top: 15px;
 }

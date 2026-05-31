@@ -17,64 +17,11 @@ function initBookSearch() {
     const searchInput = document.getElementById('book-search');
     const searchBtn = document.getElementById('search-btn');
     const resultsContainer = document.getElementById('search-results');
-    const apiSelect = document.getElementById('api-select');
-    
+
     if (!searchInput || !searchBtn) return;
-    
-    // Add API selector if it doesn't exist
-    if (!apiSelect && searchInput.parentElement) {
-        // Check if Google Books is enabled
-        const googleEnabled = window.GOOGLE_BOOKS_CONFIG && window.GOOGLE_BOOKS_CONFIG.enabled;
-        
-        // Create a container for inline layout
-        const searchContainer = document.createElement('div');
-        searchContainer.style.display = 'flex';
-        searchContainer.style.gap = '10px';
-        searchContainer.style.alignItems = 'center';
-        searchContainer.style.marginBottom = '10px';
-        
-        const select = document.createElement('select');
-        select.id = 'api-select';
-        select.style.flex = '0 0 auto';
-        select.style.minWidth = '150px';
-        select.style.padding = '8px';
-        select.style.border = '1px solid #d1d5db';
-        select.style.borderRadius = '4px';
-        
-        // Only show Google Books option if enabled
-        if (googleEnabled) {
-            select.innerHTML = `
-                <option value="both">Todas</option>
-                <option value="openlibrary">Open Library</option>
-                <option value="google">Google Books</option>
-            `;
-        } else {
-            select.innerHTML = `
-                <option value="openlibrary">Open Library</option>
-            `;
-            select.disabled = true;
-            select.style.opacity = '0.7';
-        }
-        
-        // Move search input to container
-        searchInput.style.flex = '1';
-        
-        // Replace parent with new container
-        const parent = searchInput.parentElement;
-        parent.innerHTML = '';
-        parent.appendChild(searchContainer);
-        searchContainer.appendChild(select);
-        searchContainer.appendChild(searchInput);
-        
-        // Re-get references
-        const newSearchInput = document.getElementById('book-search');
-        const newSearchBtn = document.getElementById('search-btn');
-        if (newSearchBtn) {
-            searchContainer.appendChild(newSearchBtn);
-            newSearchBtn.style.flex = '0 0 auto';
-        }
-    }
-    
+
+    // The API selector (#api-select) is rendered server-side in the view.
+
     // Search on button click
     searchBtn.addEventListener('click', performSearch);
     
@@ -88,36 +35,47 @@ function initBookSearch() {
     
     async function performSearch() {
         const query = searchInput.value.trim();
-        const apiChoice = document.getElementById('api-select').value;
-        
+        const apiSelect = document.getElementById('api-select');
+        const apiChoice = apiSelect ? apiSelect.value : 'openlibrary';
+
         if (!query) return;
-        
+
         // Show loading state
         resultsContainer.innerHTML = '<p class="text-muted">Buscando...</p>';
-        
-        try {
-            let results = [];
-            
-            if (apiChoice === 'both' || apiChoice === 'openlibrary') {
+
+        let results = [];
+        let attempted = 0;
+        let errors = 0;
+
+        // Each source fails independently so one outage doesn't kill the other.
+        if (apiChoice === 'both' || apiChoice === 'openlibrary') {
+            attempted++;
+            try {
                 const openLibResults = await searchOpenLibrary(query);
                 results = results.concat(openLibResults.map(b => ({...b, source: 'Open Library'})));
+            } catch (error) {
+                errors++;
+                console.error('Open Library search error:', error);
             }
-            
-            if (apiChoice === 'both' || apiChoice === 'google') {
+        }
+
+        if (apiChoice === 'both' || apiChoice === 'google') {
+            attempted++;
+            try {
                 const googleResults = await searchGoogleBooks(query);
                 results = results.concat(googleResults.map(b => ({...b, source: 'Google Books'})));
+            } catch (error) {
+                errors++;
+                console.error('Google Books search error:', error);
             }
-            
-            if (results.length === 0) {
-                resultsContainer.innerHTML = '<p class="text-muted">Nenhum livro encontrado.</p>';
-                return;
-            }
-            
+        }
+
+        if (results.length > 0) {
             displayResults(results);
-            
-        } catch (error) {
-            console.error('Search error:', error);
+        } else if (attempted > 0 && errors === attempted) {
             resultsContainer.innerHTML = '<p class="text-danger">Erro na busca. Tente novamente.</p>';
+        } else {
+            resultsContainer.innerHTML = '<p class="text-muted">Nenhum livro encontrado.</p>';
         }
     }
     

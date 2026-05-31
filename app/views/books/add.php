@@ -11,6 +11,15 @@ $googleBooksApiKey = $googleBooksConfig['api_key'];
         <h3>Buscar Livros</h3>
         <div class="search-form">
             <input type="text" id="book-search" class="form-input" placeholder="Digite o título ou autor...">
+            <select id="api-select" class="form-select search-api-select"<?= $googleBooksEnabled ? '' : ' disabled' ?>>
+                <?php if ($googleBooksEnabled): ?>
+                    <option value="both">Todas</option>
+                    <option value="openlibrary">Open Library</option>
+                    <option value="google">Google Books</option>
+                <?php else: ?>
+                    <option value="openlibrary">Open Library</option>
+                <?php endif; ?>
+            </select>
             <button type="button" id="search-btn" class="btn btn-secondary">Buscar</button>
         </div>
         <div id="search-results" class="search-results"></div>
