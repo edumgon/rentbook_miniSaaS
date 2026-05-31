@@ -732,8 +732,8 @@ h3 {
 }
 
 .search-form .search-api-select {
-    flex: 0 0 auto;
-    min-width: 150px;
+    flex: 0 0 160px;
+    width: 160px;        /* override .form-select width:100% so the input stays the wide field */
 }
 
 .search-results {
