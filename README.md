@@ -126,6 +126,33 @@ database/
 5. Configure um virtual host apontando para `public_html/`
 6. Acesse `http://localhost` (ou seu virtual host)
 
+## Testes
+
+A suíte é escrita em PHP puro (sem dependências) e fica em `tests/`:
+
+- `ConfigTest` — extensões, arquivos e configs presentes
+- `SecurityTest` — escape XSS, prepared statements
+- `UnitTest` — Env, Router, Auth
+- `IntegrationTest` — fluxos (criação de usuário, empréstimo, busca)
+- `ViewContractTest` — garante que toda chave `$loan/$book/$borrower['x']` usada nas views é produzida pelo `*ToArray()` do controller correspondente (protege contra descompasso controller↔view)
+
+### Rodar com PHP local
+
+```bash
+php tests/run.php
+```
+
+### Rodar via Docker (PHP 8.1, igual ao servidor)
+
+Não precisa de PHP instalado na máquina. O `pdo_mysql` é instalado no container só para o teste de extensão refletir o ambiente de produção:
+
+```bash
+docker run --rm -v "$PWD":/app -w /app php:8.1-cli \
+  sh -c "docker-php-ext-install pdo_mysql >/dev/null 2>&1; php tests/run.php"
+```
+
+A suíte completa deve terminar com `ALL TESTS PASSED` (82 testes, 0 falhas). O `run.php` marca como erro qualquer suíte que aborte sem imprimir o resumo, evitando falso-verde.
+
 ## Solução de Problemas
 
 ### Erro de conexão com banco de dados
