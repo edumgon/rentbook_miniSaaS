@@ -63,7 +63,10 @@ class Auth
      */
     public static function logout(): void
     {
-        session_destroy();
+        $_SESSION = [];
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
         self::$user = null;
     }
     

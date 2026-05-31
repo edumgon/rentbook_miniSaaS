@@ -56,15 +56,17 @@ $runner->test('Files: Core files exist', function($t) {
     }
 });
 
-$runner->test('Files: Model files exist', function($t) {
+$runner->test('Files: Domain/model files exist', function($t) {
     $requiredFiles = [
+        // Legacy auth stack (still used for login)
         BASE_PATH . '/app/models/Model.php',
         BASE_PATH . '/app/models/User.php',
-        BASE_PATH . '/app/models/Book.php',
-        BASE_PATH . '/app/models/Borrower.php',
-        BASE_PATH . '/app/models/Loan.php',
+        // Clean Architecture domain entities
+        BASE_PATH . '/app/Domain/Entity/Book.php',
+        BASE_PATH . '/app/Domain/Entity/Borrower.php',
+        BASE_PATH . '/app/Domain/Entity/Loan.php',
     ];
-    
+
     foreach ($requiredFiles as $file) {
         $t->assertTrue(file_exists($file), "Required file missing: {$file}");
     }
@@ -72,14 +74,16 @@ $runner->test('Files: Model files exist', function($t) {
 
 $runner->test('Files: Controller files exist', function($t) {
     $requiredFiles = [
+        // Legacy base + auth controller (still used for login)
         BASE_PATH . '/app/controllers/Controller.php',
         BASE_PATH . '/app/controllers/AuthController.php',
-        BASE_PATH . '/app/controllers/DashboardController.php',
-        BASE_PATH . '/app/controllers/BookController.php',
-        BASE_PATH . '/app/controllers/BorrowerController.php',
-        BASE_PATH . '/app/controllers/LoanController.php',
+        // Clean Architecture interface-adapter controllers
+        BASE_PATH . '/app/InterfaceAdapter/Controller/DashboardController.php',
+        BASE_PATH . '/app/InterfaceAdapter/Controller/BookController.php',
+        BASE_PATH . '/app/InterfaceAdapter/Controller/BorrowerController.php',
+        BASE_PATH . '/app/InterfaceAdapter/Controller/LoanController.php',
     ];
-    
+
     foreach ($requiredFiles as $file) {
         $t->assertTrue(file_exists($file), "Required file missing: {$file}");
     }
@@ -239,8 +243,15 @@ $runner->test('Code: No syntax errors in PHP files', function($t) {
 });
 
 $runner->test('Code: All classes are loadable', function($t) {
-    $classes = ['Database', 'Router', 'Auth', 'Env', 'Model', 'User', 'Book', 'Borrower', 'Loan'];
-    
+    $classes = [
+        // Legacy/core (global namespace)
+        'Database', 'Router', 'Auth', 'Env', 'Model', 'User',
+        // Clean Architecture domain entities (PSR-4)
+        'App\\Domain\\Entity\\Book',
+        'App\\Domain\\Entity\\Borrower',
+        'App\\Domain\\Entity\\Loan',
+    ];
+
     foreach ($classes as $class) {
         $t->assertTrue(class_exists($class), "Class {$class} not loadable");
     }

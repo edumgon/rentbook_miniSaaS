@@ -176,6 +176,66 @@ class TestRunner
     }
     
     /**
+     * Assert value is a boolean
+     */
+    public function assertIsBool($value, string $message = ''): void
+    {
+        if (!is_bool($value)) {
+            throw new AssertionError($message ?: "Expected bool, got " . gettype($value));
+        }
+    }
+
+    /**
+     * Assert value is empty
+     */
+    public function assertEmpty($value, string $message = ''): void
+    {
+        if (!empty($value)) {
+            throw new AssertionError($message ?: "Expected empty, got " . var_export($value, true));
+        }
+    }
+
+    /**
+     * Assert value is not empty
+     */
+    public function assertNotEmpty($value, string $message = ''): void
+    {
+        if (empty($value)) {
+            throw new AssertionError($message ?: "Expected non-empty value");
+        }
+    }
+
+    /**
+     * Assert values are not equal (strict)
+     */
+    public function assertNotEquals($expected, $actual, string $message = ''): void
+    {
+        if ($expected === $actual) {
+            throw new AssertionError($message ?: "Expected values to differ, both are " . var_export($actual, true));
+        }
+    }
+
+    /**
+     * Assert array does not have key
+     */
+    public function assertArrayNotHasKey(string $key, array $array, string $message = ''): void
+    {
+        if (array_key_exists($key, $array)) {
+            throw new AssertionError($message ?: "Array should not have key '{$key}'");
+        }
+    }
+
+    /**
+     * Assert value matches a regular expression
+     */
+    public function assertMatchesRegularExpression(string $pattern, string $value, string $message = ''): void
+    {
+        if (!preg_match($pattern, $value)) {
+            throw new AssertionError($message ?: "Value does not match pattern {$pattern}");
+        }
+    }
+
+    /**
      * Assert exception thrown
      */
     public function assertException(callable $callback, string $expectedClass = 'Exception', string $message = ''): void

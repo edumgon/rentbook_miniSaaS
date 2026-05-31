@@ -14,13 +14,25 @@ define('CONFIG_PATH', BASE_PATH . '/config');
 
 // Autoload classes
 spl_autoload_register(function ($class) {
+    // PSR-4 for the Clean Architecture namespace (App\Domain\Entity\Book -> app/Domain/Entity/Book.php)
+    $prefix = 'App\\';
+    if (strncmp($prefix, $class, strlen($prefix)) === 0) {
+        $relative = substr($class, strlen($prefix));
+        $file = APP_PATH . '/' . str_replace('\\', '/', $relative) . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+        }
+        return;
+    }
+
+    // Legacy non-namespaced classes
     $paths = [
         APP_PATH . '/core/' . $class . '.php',
         APP_PATH . '/models/' . $class . '.php',
         APP_PATH . '/controllers/' . $class . '.php',
         __DIR__ . '/' . $class . '.php'
     ];
-    
+
     foreach ($paths as $path) {
         if (file_exists($path)) {
             require_once $path;

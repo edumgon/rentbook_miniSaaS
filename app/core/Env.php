@@ -10,7 +10,16 @@ class Env
 {
     private static array $variables = [];
     private static bool $loaded = false;
-    
+
+    /**
+     * Reset loader state (used by tests to load a different .env in isolation).
+     */
+    public static function reset(): void
+    {
+        self::$variables = [];
+        self::$loaded = false;
+    }
+
     /**
      * Load .env file
      */

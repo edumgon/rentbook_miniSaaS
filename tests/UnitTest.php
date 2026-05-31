@@ -18,9 +18,10 @@ $runner->test('Env: Can load and retrieve values', function($t) {
     $tempFile = sys_get_temp_dir() . '/test_env_' . uniqid();
     mkdir($tempFile, 0777, true);
     file_put_contents($tempFile . '/.env', $envContent);
-    
+
+    Env::reset();
     Env::load($tempFile);
-    
+
     $t->assertEquals('test_value', Env::get('TEST_KEY'));
     $t->assertEquals('123', Env::get('TEST_NUMBER'));
     $t->assertEquals('default', Env::get('NON_EXISTENT', 'default'));
@@ -35,9 +36,10 @@ $runner->test('Env: Handles quoted values', function($t) {
     $tempFile = sys_get_temp_dir() . '/test_env_' . uniqid();
     mkdir($tempFile, 0777, true);
     file_put_contents($tempFile . '/.env', $envContent);
-    
+
+    Env::reset();
     Env::load($tempFile);
-    
+
     $t->assertEquals('quoted value', Env::get('QUOTED'));
     $t->assertEquals('single value', Env::get('SINGLE'));
     

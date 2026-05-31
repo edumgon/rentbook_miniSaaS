@@ -59,7 +59,15 @@ foreach ($tests as $name => $file) {
     if (preg_match('/💥 Errors:\s+(\d+)/', $output, $matches)) {
         $totalErrors += (int)$matches[1];
     }
-    
+
+    // Safety net: a suite that aborts (e.g. uncaught Error / fatal) never prints
+    // its "Test Results" summary. Without this, such a suite would contribute 0
+    // and masquerade as a pass in the final tally.
+    if (!preg_match('/Test Results:/', $output)) {
+        echo "  💥 Suite did not finish — no summary printed (exit code {$exitCode}). Counting as error.\n";
+        $totalErrors++;
+    }
+
     echo "\n";
 }
 

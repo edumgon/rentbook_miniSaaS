@@ -31,9 +31,11 @@ $runner->test('XSS: JavaScript protocol in URL is escaped', function($t) {
 $runner->test('XSS: Event handlers are escaped', function($t) {
     $malicious = 'onclick="stealCookies()"';
     $escaped = htmlspecialchars($malicious, ENT_QUOTES, 'UTF-8');
-    
+
+    // htmlspecialchars escapes the quotes (it does not strip the text), so the
+    // attribute can no longer break out of an HTML attribute context.
     $t->assertContains('&quot;', $escaped);
-    $t->assertFalse(strpos($escaped, 'onclick=') !== false);
+    $t->assertFalse(strpos($escaped, 'onclick="') !== false, 'Literal onclick="..." must be neutralized by escaping the quotes');
 });
 
 $runner->test('XSS: HTML entities are properly encoded', function($t) {
