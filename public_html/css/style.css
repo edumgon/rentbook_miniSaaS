@@ -3,24 +3,46 @@
  * Pure CSS3 - no external frameworks
  */
 
-/* CSS Variables */
+/* CSS Variables - InfoEG Digital palette (light) */
 :root {
-    --primary-color: #4f46e5;
-    --primary-hover: #4338ca;
+    color-scheme: light;
+    --primary-color: #004AAD;
+    --primary-hover: #00337a;
+    --accent-color: #29ABE2;
     --secondary-color: #6b7280;
     --success-color: #10b981;
     --danger-color: #ef4444;
     --warning-color: #f59e0b;
-    --info-color: #3b82f6;
-    --bg-color: #f3f4f6;
+    --info-color: #29ABE2;
+    --bg-color: #f9f9f9;
     --card-bg: #ffffff;
-    --text-color: #1f2937;
+    --text-color: #333333;
     --text-muted: #6b7280;
     --border-color: #e5e7eb;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --radius: 8px;
     --radius-lg: 12px;
+}
+
+/* Dark theme (InfoEG palette adapted for low light) */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --primary-color: #2f80ed;
+    --primary-hover: #5598f0;
+    --accent-color: #29ABE2;
+    --secondary-color: #9ca3af;
+    --success-color: #34d399;
+    --danger-color: #f87171;
+    --warning-color: #fbbf24;
+    --info-color: #38bdf8;
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #e5e7eb;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
 }
 
 /* Reset & Base */
@@ -31,11 +53,12 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Layout */
@@ -71,11 +94,40 @@ body {
     color: var(--primary-color);
 }
 
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
 .navbar-nav {
     display: flex;
     list-style: none;
     gap: 25px;
     align-items: center;
+}
+
+/* Theme toggle */
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.theme-toggle:hover {
+    border-color: var(--primary-color);
+    background: var(--bg-color);
 }
 
 .navbar-nav a {

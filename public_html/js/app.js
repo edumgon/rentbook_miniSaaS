@@ -5,10 +5,38 @@
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    initThemeToggle();
     initBookSearch();
     initBorrowerModal();
     initFormValidation();
 });
+
+/**
+ * Light/Dark theme toggle.
+ * Initial theme is applied inline in <head> (before paint); here we wire the
+ * button, update its icon, and persist the user's choice in localStorage.
+ */
+function initThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+
+    const root = document.documentElement;
+
+    const syncIcon = () => {
+        const dark = root.getAttribute('data-theme') === 'dark';
+        btn.textContent = dark ? '☀️' : '🌙';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    };
+
+    syncIcon();
+
+    btn.addEventListener('click', function() {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        syncIcon();
+    });
+}
 
 /**
  * Book Search using Open Library API and Google Books API
