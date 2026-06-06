@@ -93,6 +93,9 @@ abstract class Controller
      */
     protected function json(array $data, int $status = 200): void
     {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         http_response_code($status);
         header('Content-Type: application/json');
         echo json_encode($data);

@@ -107,10 +107,10 @@ class BorrowerController extends \Controller
             $this->redirect('/borrowers');
 
         } catch (\Exception $e) {
-            error_log('Borrower creation failed: ' . $e->getMessage());
+            error_log('Borrower creation failed: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
 
             if ($isAjax) {
-                $this->json(['success' => false, 'error' => 'An error occurred while adding the friend'], 500);
+                $this->json(['success' => false, 'error' => $e->getMessage(), 'file' => $e->getFile(), 'line' => $e->getLine()], 500);
             }
 
             $this->setFlash('error', 'An error occurred while adding the friend');
