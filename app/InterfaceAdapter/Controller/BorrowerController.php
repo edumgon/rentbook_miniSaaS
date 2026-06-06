@@ -80,6 +80,10 @@ class BorrowerController extends \Controller
             $this->redirect('/borrowers');
         }
 
+        $isAjax = (($_SERVER['HTTP_ACCEPT'] ?? '') === 'application/json')
+            || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
+            || (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest');
+
         try {
             $input = new CreateBorrowerInput(
                 userId: $userId,
@@ -91,11 +95,24 @@ class BorrowerController extends \Controller
 
             $output = $this->createBorrowerUseCase->execute($input);
 
+            if ($isAjax) {
+                $borrower = $this->borrowerRepository->findByIdAndUser($output->borrowerId, $userId);
+                $this->json([
+                    'success' => true,
+                    'borrower' => $borrower ? $this->borrowerToArray($borrower) : ['id' => $output->borrowerId, 'name' => $output->name]
+                ]);
+            }
+
             $this->setFlash('success', "Friend '{$output->name}' added successfully");
             $this->redirect('/borrowers');
 
         } catch (\Exception $e) {
             error_log('Borrower creation failed: ' . $e->getMessage());
+
+            if ($isAjax) {
+                $this->json(['success' => false, 'error' => 'An error occurred while adding the friend'], 500);
+            }
+
             $this->setFlash('error', 'An error occurred while adding the friend');
             $this->redirect('/borrowers');
         }

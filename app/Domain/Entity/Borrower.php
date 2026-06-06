@@ -87,7 +87,7 @@ class Borrower
             'email' => $this->email,
             'phone' => $this->phone,
             'location' => $this->location,
-            'created_at' => $this->createdAt?->format('Y-m-d H:i:s'),
+            'created_at' => ($this->createdAt ?? new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
         ];
     }
