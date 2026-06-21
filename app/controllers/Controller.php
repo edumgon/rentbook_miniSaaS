@@ -81,11 +81,17 @@ abstract class Controller
     }
     
     /**
-     * Sanitize input
+     * Sanitize input.
+     *
+     * Only trims whitespace and strips null bytes. Does NOT HTML-encode here:
+     * output escaping (htmlspecialchars in the views) is the single source of
+     * truth. Encoding on input as well double-encodes values — e.g. the '&' in
+     * a Google Books cover URL becomes '&amp;' in the DB and then '&amp;amp;'
+     * on render, breaking the image.
      */
     protected function sanitize(string $input): string
     {
-        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        return trim(str_replace("\0", '', $input));
     }
     
     /**
